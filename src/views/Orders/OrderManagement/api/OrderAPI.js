@@ -1,7 +1,5 @@
 import axios from 'axios';
 import authHeader from 'services/auth-header';
-import React from 'react';
-
 export const sendDelete = (userId, OrderType) => {
 
   const baseUrl = `http://localhost:4000/orders` + OrderType + `/delete/` + userId
