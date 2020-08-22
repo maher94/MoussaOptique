@@ -1,6 +1,5 @@
 import axios from 'axios';
 import authHeader from 'services/auth-header';
-import SameDataAlert from '../alerts/SameDataAlert'
 import React from 'react';
 
 export const sendDelete = (userId, OrderType) => {
