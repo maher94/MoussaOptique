@@ -20,9 +20,17 @@ exports.moderatorBoard = (req, res) => {
 };
 
 exports.list = async (req,res) => {
-  const data = await User.findAll({
-     
+  const data = await User.findAll({})
+  .then(function(data){
+    return data;
   })
+  .catch(error =>{
+    return error;
+  })
+  res.json({ success: true, data:data });
+}
+exports.list5Clients = async (req,res) => {
+  const data = await User.findAll({ limit: 5 })
   .then(function(data){
     return data;
   })
@@ -74,4 +82,15 @@ exports.listByUsername = async (req,res) => {
     return error;
   })
   res.json({ success: true, data:data });
+}
+exports.countClient = async (req, res) => {
+  const { userId } = req.params;
+  const { Status } = req.params;
+  const data = await db.sequelize.query('select count(*) as nb from users  ', {
+   
+  model: db.user,
+   type: sequelize.QueryTypes.SELECT
+})
+  res.json({success:true, data:data});
+
 }

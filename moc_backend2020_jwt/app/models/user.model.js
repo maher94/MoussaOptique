@@ -18,7 +18,8 @@ module.exports = (sequelize, Sequelize) => {
     Country: Sequelize.STRING,
     PostalCode: Sequelize.INTEGER,
     city:Sequelize.STRING,
-   
+    imageUrl:Sequelize.STRING,
+    sexe:Sequelize.STRING
 
 
   });

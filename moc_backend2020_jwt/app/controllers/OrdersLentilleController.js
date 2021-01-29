@@ -3,7 +3,6 @@ const controllers = {}
 
 var sequelize = require('../models/database');
 //var Orders = require('../models/Orders');
-var Client = require('../models/Client');
 
 const db = require("../models");
 
@@ -46,7 +45,7 @@ controllers.update = async (req, res) => {
       return error;
     })
   
-    res.json({ success:true, data: data, message: "Updated successful"});
+    res.json({ success:true, data: data, message: "Updated successfuly"});
   
   }
   
@@ -68,7 +67,7 @@ controllers.update = async (req, res) => {
   controllers.list = async (req,res) => {
     const { userId } = req.params;
     const data = await OrdersLentille.findAll({
-      where: { userId: userId},
+      where: { userId: userId},order:sequelize.literal('Orderno DESC')
     })
     .then(function(data){
       return data;
@@ -78,11 +77,21 @@ controllers.update = async (req, res) => {
     })
     res.json({ success: true, data:data });
   }
-  
+  controllers.AllOrders = async (req,res) => {
+     
+    const data = await OrdersLentille.findAll({ limit: 6 ,order:sequelize.literal('Orderdate DESC')})
+    .then(function(data){
+      return data;
+    })
+    .catch(error =>{
+      return error;
+    })
+    res.json({ success: true, data:data });
+  }
   controllers.create = async (req,res) => {
   
     // DATA parametros desde post
-    const {Orderdate, Category, Products, Comment,qte,pss,Status,userId } = req.body;
+    const {Orderdate, Category, Products, Comment,qte,pss,Status,userId,price,paidAmount,partiallyPaidAmount,amountStillToPay } = req.body;
    
     //create
     const data = await OrdersLentille.create({
@@ -93,7 +102,11 @@ controllers.update = async (req, res) => {
       Comment:Comment,
       qte:qte,
       pss:pss,
-      userId:userId
+      userId:userId,
+      price:price,
+      paidAmount:paidAmount,
+      partiallyPaidAmount:partiallyPaidAmount,
+      amountStillToPay:amountStillToPay
   
     })
     .then(function(data){
@@ -156,9 +169,195 @@ controllers.update = async (req, res) => {
   
     res.json({ success: true, data:data });
     
-  
-  
-  
+  }
+
+
+  controllers.countPercentage = async (req, res) => {
+    const data = await db.sequelize.query('	SELECT count(*) as nbLenses,(select count(*) from optika.OrdersProduits  )as nbProduct,(select count(*) from ordersproduits)+(select count(*) from orderslentilles) as total FROM orderslentilles;', {
+    model: db.OrdersLentille,
+     type: sequelize.QueryTypes.SELECT
+  })
+    res.json({success:true, data:data});
   
   }
+  controllers.getNbOrdersByMonth =async (req, res) => {
+    
+    const data = await db.sequelize.query('select MONTHNAME(orderslentilles.Orderdate) as monthName,count(*) as nbOrders from orderslentilles     where   year(Orderdate) in (2020,2021)    group by MONTHNAME(orderslentilles.Orderdate)    order by month(orderslentilles.Orderdate);', {
+    model: db.OrdersLentille,
+     type: sequelize.QueryTypes.SELECT
+  })
+  
+    res.json({ success: true, data:data });
+     
+  }
+  controllers.totalProfitLenses =async (req, res) => {
+    
+    const data = await db.sequelize.query('select sum(paidAmount) as lensesProfit from orderslentilles;', {
+    model: db.OrdersLentille,
+     type: sequelize.QueryTypes.SELECT
+  })
+  
+    res.json({ success: true, data:data });
+     
+  }
+  controllers.listALLOrders = async (req, res) => {
+    const data = await db.sequelize.query('select * from optika.orderslentilles union select * from optika.ordersproduits;', {
+    model: db.OrdersLentille,
+    model:db.OrdersProduit,
+     type: sequelize.QueryTypes.SELECT
+  })
+    res.json({success:true, data:data});
+  
+  }
+  controllers.listLenses = async (req,res) => {
+    const data = await db.sequelize.query(' select orderslentilles.* ,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id order by orderslentilles.Orderdate desc    ', {
+     
+      model:db.OrdersProduit,
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    
+    controllers.listValidatedLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Validated" order by orderslentilles.Orderdate desc   ;', {
+      model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    
+    controllers.listDraftLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Draft" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listRejectedLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Rejected" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listCreatedLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Created" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listWaitingValidationOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="WaitingValidation" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listInProgressLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="InProgress" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listSuspendedLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Suspended" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listPaidLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="Paid" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.listPartiallyPaidLensesOrders = async (req, res) => {
+      const data = await db.sequelize.query('select  orderslentilles.*,users.FirstName , users.LastName from optika.orderslentilles,users where userId=users.id and status="PartiallyPaid" order by orderslentilles.Orderdate desc   ;', {
+        model: db.OrdersLentille,
+    
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.countPercentage = async (req, res) => {
+      const data = await db.sequelize.query('	SELECT count(*) as nbLenses,(select count(*) from optika.OrdersProduits  )as nbProduct,(select count(*) from ordersproduits)+(select count(*) from orderslentilles) as total FROM orderslentilles;', {
+      model: db.OrdersLentille,
+       type: sequelize.QueryTypes.SELECT
+    })
+      res.json({success:true, data:data});
+    
+    }
+    controllers.getNborderbyPss =async (req,res) => {
+    
+      const data = await db.sequelize.query('select pss,count(*) as nb from optika.orderslentilles group by optika.orderslentilles.pss', {
+      model: db.OrdersLentille,
+       type: sequelize.QueryTypes.SELECT
+    })
+    
+      res.json({ success: true, data:data });
+       
+    }
+    controllers.getNborderbyStatus =async (req,res) => {
+    
+      const data = await db.sequelize.query('SELECT count(*) as nb,status FROM optika.orderslentilles group by Status;', {
+      model: db.OrdersProduit,
+       type: sequelize.QueryTypes.SELECT
+    })
+    
+      res.json({ success: true, data:data });
+       
+    }
+    controllers.LensesPayment =async (req,res) => {
+      
+        const { amount } = req.params;
+        const { Orderno } = req.params;
+      const data = await db.sequelize.query('update optika.orderslentilles set amountStillToPay=amountStillToPay-:amount ,partiallyPaidAmount=partiallyPaidAmount+ :amount ,paidAmount=paidAmount+ :amount where Orderno=(:Orderno) ', {
+
+        replacements: {amount: amount,Orderno: Orderno},
+
+        model: db.OrdersLentille,
+       type: sequelize.QueryTypes.UPDATE
+    })
+    
+      res.json({ success: true, data:data });
+       
+    }
+    controllers.amountStillToPay =async (req,res) => {
+      
+      
+      const { Orderno } = req.params;
+    const data = await db.sequelize.query('SELECT amountStillToPay FROM optika.orderslentilles where Orderno=(:Orderno) ', {
+
+      replacements: {Orderno: Orderno},
+
+      model: db.OrdersLentille,
+     type: sequelize.QueryTypes.SELECT
+  })
+  
+    res.json({ success: true, data:data });
+     
+  }
+    
 module.exports = controllers;

@@ -20,7 +20,11 @@ module.exports = function(app) {
   app.get('/api/user/list',controller.list);
   app.get('/api/user/listByUsername/:username',controller.listByUsername);
   app.post('/api/user/updateProfile/:userid',controller.update);
+  
+  app.get('/api/user/list5Clients',controller.list5Clients);
+  app.get('/api/user/countClient',controller.countClient);
 
+  
   app.get(
     "/api/test/mod",
     [authJwt.verifyToken, authJwt.isModerator],

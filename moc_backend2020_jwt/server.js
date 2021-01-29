@@ -86,11 +86,13 @@ const ordersRouters = require('./app/routes/OrdersRoute');
 const clientRouters = require('./app/routes/ClientRoute');
 const ordersLentilleRouters = require('./app/routes/OrdersLentilleRoute');
 const ordersProduitRouters = require('./app/routes/OrdersProduitRoute');
+const stockRouters = require('./app/routes/StockRoute');
 
 //Route
 app.use('/orders', ordersRouters);
 app.use('/ordersLentille', ordersLentilleRouters);
 app.use('/ordersProduit', ordersProduitRouters);
+app.use('/stock', stockRouters);
 
 app.use('/clients', clientRouters);
 

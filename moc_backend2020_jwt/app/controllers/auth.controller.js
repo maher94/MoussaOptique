@@ -9,13 +9,15 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  // Save User to Database
   User.create({
     username: req.body.username,
     email: req.body.email,
     FirstName:req.body.firstName,
     LastName:req.body.lastName,
-    password: bcrypt.hashSync(req.body.password, 8)
+    sexe:req.body.sexe,
+    password: bcrypt.hashSync(req.body.password, 8),
+    
+    
   })
     .then(user => {
       if (req.body.roles) {
@@ -66,7 +68,7 @@ exports.signin = (req, res) => {
       }
 
       var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 28800 // 8 hours
+        expiresIn: 30
       });
        
       var authorities = [];
@@ -78,7 +80,9 @@ exports.signin = (req, res) => {
           id: user.id,
           username: user.username,
           FirstName:user.FirstName,
+          LastName : user.LastName,
           email: user.email,
+          sexe:user.sexe,
           roles: authorities,
           accessToken: token
         });

@@ -14,7 +14,10 @@ module.exports = (sequelize, Sequelize) => {
           Comment: Sequelize.STRING(30),
           qte:Sequelize.INTEGER,
           volume:Sequelize.STRING,
-          
+          price:Sequelize.INTEGER,
+          partiallyPaidAmount:Sequelize.INTEGER,
+          paidAmount:Sequelize.INTEGER,
+          amountStillToPay:Sequelize.INTEGER,
           
         })
         return ordersProduit;
